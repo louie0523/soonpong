@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8236972611357021395}
+  - component: {fileID: 6441666206665059684}
   - component: {fileID: 599065478633727446}
   - component: {fileID: 8484544527141376547}
   - component: {fileID: 6310229355220138011}
@@ -34,6 +35,36 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6441666206665059684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6345997840015720540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2314cf681f73a499362fd4cd7a0ed4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DottyObj: {fileID: 0}
+  Events:
+  - Range: 80
+    Events:
+    - {fileID: 11400000, guid: 994c83b00a78e994b8a66ef57bb435b8, type: 2}
+    - {fileID: 11400000, guid: b3670a3d04b435c469ef595d0615fd32, type: 2}
+    - {fileID: 11400000, guid: ac4f7eb7a5ac46a479b291a383113e5c, type: 2}
+    - {fileID: 11400000, guid: 69d0c0b408aae5343a0217119b2c714b, type: 2}
+    - {fileID: 11400000, guid: 32b9a21f686991e449cef90325a947f1, type: 2}
+    - {fileID: 11400000, guid: 8a7b792c72cc69f4ba3bef30dfffddda, type: 2}
+    - {fileID: 11400000, guid: f9d7d8dff82bb584bbdf7402f1a51f32, type: 2}
+  - Range: 20
+    Events:
+    - {fileID: 11400000, guid: ddbd77d2c019159419fb7182b2f3692f, type: 2}
+    - {fileID: 11400000, guid: 47c84eb2ba94e91429911e40456fcdac, type: 2}
+    - {fileID: 11400000, guid: a747b8dd2e825cc4dbcd19e1cdcda5bb, type: 2}
+    - {fileID: 11400000, guid: 408573585d8057341a01ff234a053a4a, type: 2}
+    - {fileID: 11400000, guid: 9dd1b1c95c6139841a112544f1b935a9, type: 2}
 --- !u!212 &599065478633727446
 SpriteRenderer:
   m_ObjectHideFlags: 0
