@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using static UnityEngine.Rendering.DebugUI;
 
 
 public enum AddType
@@ -33,6 +34,10 @@ public class GameManager : MonoBehaviour
     public float AutoTimer;
     public float AutoTime = 10f;
     public bool Checking = false;
+    public int SDottyCount = 0;
+    public int MaxSDottyCount = 25;
+    public List<bool> DottyUnLock = new List<bool> { true, false, false, false, false, false, false, false, false };
+    public bool SpecialDotty = false;
 
     [Header("업그레이드")]
     public int AutoSoonPungUp = 0;
@@ -90,28 +95,29 @@ public class GameManager : MonoBehaviour
         if (SoonPungLv[num] >= 10)
         {
             UIManager.Instance.Message("이미 최대 레벨입니다.");
+            SfxManager.instance.PlaySfx("취소");
             return;
         }
 
         if (SoonPungPrice[num] > Money)
         {
             UIManager.Instance.Message("돈이 부족합니다.");
+            SfxManager.instance.PlaySfx("취소");
             return;
         }
 
         AddMoeny(-SoonPungPrice[num]);
-        SoonPungPrice[num] = PriceUp(UpGradeMoneyUpper[num], SoonPungPrice[num]);
         SoonPungLv[num]++;
         switch(num)
         {
             case 0:
-                AutoTime -= UpgradeValue[num];
+                AutoTime -= Mathf.Round(UpgradeValue[num] * 100f) / 100f;
                 break;
             case 1:
-                SoonPungMoney += UpgradeValue[num];
+                SoonPungMoney += Mathf.Round(UpgradeValue[num] * 10f) / 10f;
                 break;
             case 2:
-                MoneyValue += UpgradeValue[num];
+                MoneyValue += Mathf.Round(UpgradeValue[num] * 10f) / 10f;
                 break;
             case 3:
                 DoubleRand += (int)UpgradeValue[num];
@@ -121,7 +127,9 @@ public class GameManager : MonoBehaviour
                 break;
 
         }
-       
+        SfxManager.instance.PlaySfx("구매");
+        SoonPungPrice[num] = PriceUp(UpGradeMoneyUpper[num], SoonPungPrice[num]);
+
 
 
     }
@@ -142,7 +150,11 @@ public class GameManager : MonoBehaviour
 
     public void AddMoeny(float value )
     {
-        Money += value * MoneyValue;
+
+        if (value > 0)
+            Money += value * MoneyValue;
+        else
+            Money += value;
 
     }
 
@@ -173,8 +185,8 @@ public class GameManager : MonoBehaviour
             namesByEvent[e.name].Add(currentDotty[i].name);
             moneyByEvent[e.name] += e.EventMoney;
 
-            EndMoney += e.EventMoney * MoneyValue;
-            AddMoeny(e.EventMoney * MoneyValue);
+            EndMoney += (int)(e.EventMoney * MoneyValue);
+            AddMoeny(e.EventMoney);
         }
         
 
@@ -189,6 +201,7 @@ public class GameManager : MonoBehaviour
         }
 
         str += $"합계: {EndMoney}원";
+        SfxManager.instance.PlaySfx("구매");
         UIManager.Instance.DottyResult(str);
         Debug.Log(str);
 

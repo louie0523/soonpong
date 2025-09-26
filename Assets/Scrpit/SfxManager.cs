@@ -32,7 +32,11 @@ public class SfxManager : MonoBehaviour
 
     public void Update()
     {
-        
+        Bgm.volume = BgmSlider.value; 
+
+       Sfx.volume = SfxSlider.value;
+
+
     }
 
     void Setting()
@@ -75,5 +79,10 @@ public class SfxManager : MonoBehaviour
         AudioClip cc = clips[name];
 
         Sfx.PlayOneShot(cc);
+    }
+
+    public void SfxSettingON()
+    {
+        Canvas.SetActive(true);
     }
 }

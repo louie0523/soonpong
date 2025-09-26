@@ -49,21 +49,23 @@ public class UIManager : MonoBehaviour
 
             TextMeshProUGUI NameTxt = obj.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI EffectTxt = obj.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
-            TextMeshProUGUI UpGradePriceTxt = obj.transform.GetChild(3).transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI UpGradePriceTxt = obj.transform.GetChild(3).transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
+
+
 
             switch (i)
             {
                 case 0:
                     NameTxt.text = $"자동 출산 LV.{GameManager.instance.SoonPungLv[i]}";
-                    EffectTxt.text = $"{GameManager.instance.AutoTime}초마다 1명의 도티를 자동 출산합니다.";
+                    EffectTxt.text = $"{GameManager.instance.AutoTime.ToString("F2")}초마다 1명의 도티를 자동 출산합니다.";
                     break;
                 case 1:
                     NameTxt.text = $"출산 장려금 LV.{GameManager.instance.SoonPungLv[i]}";
                     EffectTxt.text = $"출산시 추가로 {GameManager.instance.SoonPungMoney}원을 획득합니다.";
                     break;
                 case 2:
-                    NameTxt.text = $"자산 괸리 LV.{GameManager.instance.SoonPungLv[i]}";
-                    EffectTxt.text = $"돈 획득시 추가로 {(GameManager.instance.MoneyValue - 1) * 100}% 획득";
+                    NameTxt.text = $"자산 관리 LV.{GameManager.instance.SoonPungLv[i]}";
+                    EffectTxt.text = $"돈 획득시 추가로 {(int)((GameManager.instance.MoneyValue - 1) * 100)}% 획득";
                     break;
                 case 3:
                     NameTxt.text = $"쌍둥이 출산 LV.{GameManager.instance.SoonPungLv[i]}";
