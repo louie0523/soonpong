@@ -5,6 +5,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
 
+
+[System.Serializable]
+public class SoonPungUI
+{
+    public Sprite icon;
+    public string Name;
+    public string Explain;
+    public List<float> values = new List<float>();
+}
+
+
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
@@ -13,7 +24,10 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI DottyCountText;
     public TextMeshProUGUI MoneyText;
     public GameObject DottyResultObj;
-
+    [Header("ì¶œì‚° ì§€ì›")]
+    public List<SoonPungUI> soonPungUIs = new List<SoonPungUI>();
+    public GameObject SoonpungBtnPrefab;
+    public GameObject SoonpungBtnParent;
 
     private void Awake()
     {
@@ -28,7 +42,7 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        DottyCountText.text = $"ÇöÀç ³ºÀº µµÆ¼ : {GameManager.instance.currentDotty.Count}¸í";
+        DottyCountText.text = $"í˜„ì¬ ê¹Œì§€ ë‚³ì€ ë„í‹° : {GameManager.instance.currentDotty.Count}ëª…";
 
         SetMoneyText();
     }
@@ -38,29 +52,29 @@ public class UIManager : MonoBehaviour
         long money = (long)GameManager.instance.Money;
 
         string result = FormatKoreanCurrency(money);
-        MoneyText.text = "ÇöÀç µ· : " + result;
+        MoneyText.text = "í˜„ì¬ ëˆ : " + result;
     }
 
     string FormatKoreanCurrency(long money)
     {
-        if (money == 0) return "0¿ø";
+        if (money == 0) return "ì›";
 
-        long eok = money / 100000000;     // ¾ï
+        long eok = money / 100000000;     // ï¿½ï¿½
         money %= 100000000;
 
-        long man = money / 10000;         // ¸¸
+        long man = money / 10000;         // ï¿½ï¿½
         money %= 10000;
 
-        long won = money;                 // ¿ø
+        long won = money;                 // ï¿½ï¿½
 
         string result = "";
 
-        if (eok > 0) result += $"{eok}¾ï ";
-        if (man > 0) result += $"{man}¸¸ ";
+        if (eok > 0) result += $"{eok}ì–µ ";
+        if (man > 0) result += $"{man}ë§Œ ";
         if (won > 0) result += $"{won}";
 
         result = result.Trim();
-        result += "¿ø";
+        result += "ì›";
 
         return result;
     }

@@ -10,8 +10,13 @@ public class GameManager : MonoBehaviour
     public List<Dotty> currentDotty = new List<Dotty>();
     public Dictionary<string, DottyEvent> eventStr = new Dictionary<string, DottyEvent>(); 
     public float Money;
-
+    public float AutoTimer;
+    public float AutoTime = 10f;
     public bool Checking = false;
+
+    [Header("ì—…ê·¸ë ˆì´ë“œ")]
+    public int AutoSoonPungUp = 0;
+    public float MoneyValue = 1f;
 
     private void Awake()
     {
@@ -19,15 +24,31 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
             Setting();
+            AutoTimer = AutoTime;
         } else
         {
             Destroy(gameObject);
         }
     }
 
+    private void Update()
+    {
+        AutoSoonPung();
+    }
+
+    void AutoSoonPung()
+    {
+        AutoTimer -= Time.deltaTime;
+        if (AutoTimer <= 0)
+        {
+            SoonPung.instance.DottySoonPung();
+            AutoTimer = AutoTime;
+        }
+    }
+
     void Setting()
     {
-        DottyEvent[] events = Resources.LoadAll<DottyEvent>("ÀÌº¥Æ®/");
+        DottyEvent[] events = Resources.LoadAll<DottyEvent>("ì´ë²¤íŠ¸/");
 
         foreach(DottyEvent e in events)
         {
@@ -40,10 +61,9 @@ public class GameManager : MonoBehaviour
     {
         if(currentDotty.Count == 0) { return; }
 
-        SfxManager.instance.PlaySfx("È£ÀÕÂ¥ÀÕÈ£ÀÕÈ£");
+        SfxManager.instance.PlaySfx("í˜¸ì‡ì§œì‡í˜¸ì‡í˜¸");
 
         Checking = true;
-        // ÀÌº¥Æ®º°·Î Âü¿©ÀÚ ¼ö¿Í ÇÕ»ê ±İ¾×À» ÀúÀå
         Dictionary<string, List<string>> namesByEvent = new Dictionary<string, List<string>>();
         Dictionary<string, float> moneyByEvent = new Dictionary<string, float>();
 
@@ -54,7 +74,6 @@ public class GameManager : MonoBehaviour
             DottyEvent e = currentDotty[i].GetEvent();
             if (e == null) continue;
 
-            // ÀÌº¥Æ®º° Âü°¡ÀÚ °ü¸®
             if (!namesByEvent.ContainsKey(e.name))
             {
                 namesByEvent[e.name] = new List<string>();
@@ -65,10 +84,8 @@ public class GameManager : MonoBehaviour
             moneyByEvent[e.name] += e.EventMoney;
 
             EndMoney += e.EventMoney;
-            Money += e.EventMoney; // ÃÑÇÕ °»½Å
+            Money += e.EventMoney;
         }
-
-        // ¸Ş½ÃÁö »ı¼º
         string str = "";
         foreach (var kvp in namesByEvent)
         {
@@ -76,10 +93,10 @@ public class GameManager : MonoBehaviour
             List<string> participants = kvp.Value;
             float totalMoney = moneyByEvent[eventName];
 
-            str += $"µµÆ¼ {participants.Count}¸íÀº {eventStr[eventName].EventStr} {totalMoney}¿ø\n";
+            str += $"ë„í‹° {participants.Count}ëª…ì€ {eventStr[eventName].EventStr} {totalMoney}ì›\n";
         }
 
-        str += $"ÃÑÇÕ: {EndMoney}¿ø";
+        str += $"í•©ê³„: {EndMoney}ì›";
         UIManager.Instance.DottyResult(str);
         Debug.Log(str);
 

@@ -53,7 +53,7 @@ public class SfxManager : MonoBehaviour
     {
         if (!clips.ContainsKey(name))
         {
-            Debug.Log("Á¸ÀçÇÏÁö ¾Ê´Â »ç¿îµåÅ¬¸³");
+            Debug.Log("í•´ë‹¹ ì˜¤ë””ì˜¤ í´ë¦½ì´ ì¡´ì¬í•˜ì§€ ì•ŠìŒ.");
             return;
         }
 
@@ -68,7 +68,7 @@ public class SfxManager : MonoBehaviour
     {
         if (!clips.ContainsKey(name))
         {
-            Debug.Log("Á¸ÀçÇÏÁö ¾Ê´Â »ç¿îµåÅ¬¸³");
+            Debug.Log("í•´ë‹¹ ì˜¤ë””ì˜¤ í´ë¦½ì´ ì¡´ì¬í•˜ì§€ ì•ŠìŒ.");
             return;
         }
 

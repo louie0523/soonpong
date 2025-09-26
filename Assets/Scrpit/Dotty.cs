@@ -20,14 +20,13 @@ public class Dotty : MonoBehaviour
         if (Events == null || Events.Count == 0)
             return null;
 
-        // 전체 범위 합계 계산
+
         int totalRange = 0;
         foreach (var e in Events)
         {
             totalRange += e.Range;
         }
 
-        // 합계가 100이 아니면 null 반환
         if (totalRange != 100)
             return null;
 
@@ -44,7 +43,6 @@ public class Dotty : MonoBehaviour
                 }
                 else
                 {
-                    // 빈 범위가 선택됨 (확률적으로 아무것도 얻지 못함)
                     return null;
                 }
             }

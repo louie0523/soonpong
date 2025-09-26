@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.EventSystems; // UI Ã¼Å©ÇÏ·Á¸é ÇÊ¿ä
+using UnityEngine.EventSystems;
 
 public class SoonPung : MonoBehaviour
 {
@@ -32,7 +32,6 @@ public class SoonPung : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            // UI À§ÀÏ ¶§´Â ½ÇÇà ¾È ÇÔ
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                 return;
 
@@ -45,7 +44,7 @@ public class SoonPung : MonoBehaviour
         animator.SetTrigger("soon");
         Dotty dt = Instantiate(Dotty, SonnPungPoint.position, Quaternion.identity, transform).GetComponent<Dotty>();
         int rand = Random.Range(1, 3);
-        SfxManager.instance.PlaySfx("È£ÀÕÂ¥" + rand);
+        SfxManager.instance.PlaySfx("í˜¸ìž‡ì§œ" + rand);
 
         GameManager.instance.currentDotty.Add(dt);
     }
