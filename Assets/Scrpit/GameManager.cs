@@ -2,6 +2,26 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+
+public enum AddType
+{
+    Plus,
+    Mult
+}
+
+[System.Serializable]
+public class PriceUp
+{
+    public AddType type;
+    public float value;
+
+    public PriceUp(AddType addType , float value)
+    {
+        this.type = addType;
+        this.value = value;
+    }
+}
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
@@ -16,7 +36,16 @@ public class GameManager : MonoBehaviour
 
     [Header("업그레이드")]
     public int AutoSoonPungUp = 0;
+    public float SoonPungMoney = 0;
     public float MoneyValue = 1f;
+    public int DoubleRand = 0;
+    public int BadRandMinus = 0;
+    public List<int> SoonPungLv = new List<int>();
+    public List<PriceUp> UpGradeMoneyUpper = new List<PriceUp>();
+    public List<float> SoonPungPrice = new List<float>();
+    public List<float> UpgradeValue = new List<float>();
+
+    
 
     private void Awake()
     {
@@ -56,6 +85,67 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SoonPungUpgrade(int num)
+    {
+        if (SoonPungLv[num] >= 10)
+        {
+            UIManager.Instance.Message("이미 최대 레벨입니다.");
+            return;
+        }
+
+        if (SoonPungPrice[num] > Money)
+        {
+            UIManager.Instance.Message("돈이 부족합니다.");
+            return;
+        }
+
+        AddMoeny(-SoonPungPrice[num]);
+        SoonPungPrice[num] = PriceUp(UpGradeMoneyUpper[num], SoonPungPrice[num]);
+        SoonPungLv[num]++;
+        switch(num)
+        {
+            case 0:
+                AutoTime -= UpgradeValue[num];
+                break;
+            case 1:
+                SoonPungMoney += UpgradeValue[num];
+                break;
+            case 2:
+                MoneyValue += UpgradeValue[num];
+                break;
+            case 3:
+                DoubleRand += (int)UpgradeValue[num];
+                break;
+            case 4:
+                BadRandMinus += (int)UpgradeValue[num];
+                break;
+
+        }
+       
+
+
+    }
+
+    public float PriceUp(PriceUp up, float lastMoney)
+    {
+        float result = 0;
+        if(up.type == AddType.Plus)
+        {
+            result = lastMoney + up.value;
+        } else
+        {
+            result = lastMoney * up.value;
+        }
+
+        return result;
+    }
+
+    public void AddMoeny(float value )
+    {
+        Money += value * MoneyValue;
+
+    }
+
 
     public void GetOutDottys()
     {
@@ -83,9 +173,11 @@ public class GameManager : MonoBehaviour
             namesByEvent[e.name].Add(currentDotty[i].name);
             moneyByEvent[e.name] += e.EventMoney;
 
-            EndMoney += e.EventMoney;
-            Money += e.EventMoney;
+            EndMoney += e.EventMoney * MoneyValue;
+            AddMoeny(e.EventMoney * MoneyValue);
         }
+        
+
         string str = "";
         foreach (var kvp in namesByEvent)
         {
