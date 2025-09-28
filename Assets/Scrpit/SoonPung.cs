@@ -125,4 +125,76 @@ public class SoonPung : MonoBehaviour
         GameManager.instance.LvCheck();
 
     }
+
+
+    public void DottySoonPungGa(int num)
+    {
+        for(int i = 0; i < num; i++)
+        {
+            Debug.Log(i + 1);
+            int DottyNum = 0;
+            if (GameManager.instance.Gpoint >= 1)
+            {
+
+
+
+                int r = Random.Range(0, GameManager.instance.Gpoint + 1);
+
+                DottyNum = r;
+
+
+            }
+
+            animator.SetTrigger("soon");
+            Dotty dt = Instantiate(Dotty[DottyNum], SonnPungPoint.position, Quaternion.identity, transform).GetComponent<Dotty>();
+            int rand = Random.Range(1, 3);
+            if (GameManager.instance.gotChaDangay == 0)
+                SfxManager.instance.PlaySfx("호잇짜" + rand);
+
+            GameManager.instance.AddMoeny(GameManager.instance.SoonPungMoney);
+
+            GameManager.instance.currentDotty.Add(dt);
+            GameManager.instance.currentGetDotty++;
+
+
+
+            GameManager.instance.LvCheck();
+
+            if (GameManager.instance.DoubleRand <= 0)
+                continue;
+
+            int DottyNum2 = 0;
+            if (GameManager.instance.Gpoint >= 1)
+            {
+                int r = Random.Range(0, GameManager.instance.Gpoint + 1);
+
+                DottyNum2 = r;
+            }
+
+            int dr = Random.Range(1, 101);
+            if (dr < GameManager.instance.DoubleRand)
+            {
+                animator.SetTrigger("soon");
+                Dotty dt2 = Instantiate(Dotty[DottyNum2], SonnPungPoint.position, Quaternion.identity, transform).GetComponent<Dotty>();
+                if (GameManager.instance.gotChaDangay == 0)
+                    SfxManager.instance.PlaySfx("짜잇호1");
+                GameManager.instance.currentDotty.Add(dt2);
+                GameManager.instance.currentGetDotty++;
+
+
+                GameManager.instance.AddMoeny(GameManager.instance.SoonPungMoney);
+
+            }
+
+
+            GameManager.instance.LvCheck();
+        }
+       
+
+    }
+
+
+
+
+
 }

@@ -1,13 +1,11 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using static UnityEngine.Rendering.DebugUI;
-using System.Net.NetworkInformation;
-using UnityEditor.PackageManager;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 
 public enum AddType
@@ -36,9 +34,11 @@ public class GameManager : MonoBehaviour
 
 
 
-    [Header("시작 bgm")]
+    [Header("bgm")]
     public string bgmName;
+    public string CitybgmName;
     [Header("인게임 정보")]
+    public bool GameCelar = false;
     public List<Dotty> currentDotty = new List<Dotty>();
     public Dictionary<string, DottyEvent> eventStr = new Dictionary<string, DottyEvent>(); 
     public float Money;
@@ -66,6 +66,30 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI DottyName;
     public GameObject Backbtn;
     public GameObject GotcahBannerParent;
+    public int GaSkyCount = 0;
+    public TextMeshProUGUI NoText;
+
+    [Header("도시")]
+    public GameObject cityCam;
+
+    [Header("병원")]
+    public GameObject HosLow;
+    public GameObject HosHigh;
+    public bool HospAct = false;
+    public int hospitalLv = 0;
+    public int HosPeople = 0;
+    public float hospitalTime = 5f;
+    public float hospitalTimer = 0;
+    public int CurrentHosDottyCount;
+    public int MaxCurrentDootyCoun = 100;
+    public List<float> HospUpgradePrice = new List<float>();
+    public List<float> HospAddTooUpgradePrice = new List<float>();
+    public List<int> HosAddToolLv = new List<int>();
+    public float GetHosPeopleTime = 60f;
+    public float GetHosPeopleTimer = 0;
+    public int GetHosPeopleCoun = 5;
+    public int currentGetsPeopls;
+
 
     [Header("업그레이드")]
     public int AutoSoonPungUp = 0;
@@ -77,6 +101,7 @@ public class GameManager : MonoBehaviour
     public List<PriceUp> UpGradeMoneyUpper = new List<PriceUp>();
     public List<float> SoonPungPrice = new List<float>();
     public List<float> UpgradeValue = new List<float>();
+    public int TichketPrice = 10000;
 
     
 
@@ -98,6 +123,20 @@ public class GameManager : MonoBehaviour
         SfxManager.instance.PlayBgm(bgmName);
     }
 
+    public void Ticketbuy()
+    {
+        if (TichketPrice > Money)
+        {
+            UIManager.Instance.Message("돈이 부족합니다.");
+            SfxManager.instance.PlaySfx("취소");
+            return;
+        }
+
+        GTicket++;
+        Money -= TichketPrice;
+        SfxManager.instance.PlaySfx("구매");
+    }
+
     private void Update()
     {
         AutoSoonPung();
@@ -117,6 +156,106 @@ public class GameManager : MonoBehaviour
                 heartSfxTimer = 0;
             }
         }
+
+        if (HospAct)
+            HosDottySoonPung();
+
+        if(Input.GetKeyDown(KeyCode.F1))
+        {
+            Money += 10000000;
+        }
+
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            SoonPung.instance.DottySoonPungGa(200);
+        }
+
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            GaSkyCount = 25;
+        }
+    }
+
+
+    public void HosDottySoonPung()
+    {
+        hospitalTimer += Time.deltaTime;
+        if(hospitalTimer >= hospitalTime)
+        {
+            hospitalTimer = 0;
+            HosSoonpung.instance.HosDottySoonPung(HosPeople * hospitalLv);
+            Debug.Log(HosPeople * hospitalLv);
+        }
+    }
+
+    public void HosUpgrade()
+    {
+        if(hospitalLv >= 10)
+        {
+            UIManager.Instance.Message2("이미 최대 레벨입니다.");
+            SfxManager.instance.PlaySfx("취소");
+            return;
+        }
+
+        if(Money < HospUpgradePrice[hospitalLv])
+        {
+            UIManager.Instance.Message2("돈이 부족합니다.");
+            SfxManager.instance.PlaySfx("취소");
+            return;
+        }
+
+        Money -= HospUpgradePrice[hospitalLv];
+        hospitalLv++;
+        UIManager.Instance.Message2("병원 레벨이 증가하였습니다!");
+        SfxManager.instance.PlaySfx("건물레벨업");
+
+        if(hospitalLv >= 5)
+        {
+            HosLow.SetActive(false);
+            HosHigh.SetActive(true);
+        }
+
+    }
+
+    public void HosAddUpgrade(int num)
+    {
+        if (HosAddToolLv[num] >= 10)
+        {
+            UIManager.Instance.Message2("이미 최대 레벨입니다.");
+            SfxManager.instance.PlaySfx("취소");
+            return;
+        }
+
+        if (Money < HospAddTooUpgradePrice[num])
+        {
+            UIManager.Instance.Message2("돈이 부족합니다.");
+            SfxManager.instance.PlaySfx("취소");
+            return;
+        }
+        Money -= HospAddTooUpgradePrice[num];
+        HospAddTooUpgradePrice[num] += 1000000 + (HosAddToolLv[num] * 80000);
+        HosAddToolLv[num]++;
+        UIManager.Instance.Message2("병원 효과가 증가하였습니다!");
+        SfxManager.instance.PlaySfx("구매");
+
+        switch(num)
+        {
+            case 0:
+                HosPeople += 3;
+                break;
+            case 1:
+                MaxCurrentDootyCoun += 440;
+                break; 
+            case 2:
+                hospitalTime -= 0.25f;
+                break;
+            case 3:
+                GetHosPeopleTime -= 3;
+                if (HosAddToolLv[num] % 2 == 0)
+                    GetHosPeopleCoun++;
+                break;
+        }
+
     }
 
     void AutoSoonPung()
@@ -139,6 +278,35 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void GoToCity()
+    {
+
+        if(SoonPungRealLv < 2)
+        {
+            UIManager.Instance.Message("아직 해금되지 않은 기능입니다.");
+            SfxManager.instance.PlaySfx("취소");
+            return;
+        }
+
+        if(!HospAct)
+            HospAct = true;
+
+        if(currentMap != 0)
+            return;
+        cityCam.gameObject.SetActive(true);
+        SfxManager.instance.PlayBgm(CitybgmName);
+        currentMap = 1;
+    }
+
+    public void BackToHome()
+    {
+        if (currentMap != 1)
+            return;
+        cityCam.gameObject.SetActive(false);
+        SfxManager.instance.PlayBgm(bgmName);
+        currentMap = 0;
+    }
+
     public void LvCheck()
     {
         Debug.Log("레벨 체킹");
@@ -153,7 +321,14 @@ public class GameManager : MonoBehaviour
                 UIManager.Instance.LevelUP();
                 currentGetDotty = 0;
                 GTicket += LvUpGtick[SoonPungRealLv - 1];
+                TichketPrice += 150000 + (SoonPungRealLv * 20000);
             }
+        } else if(currentGetDotty >= NeedLvDotty[SoonPungRealLv])
+        {
+            GameCelar = true;
+            SfxManager.instance.PlayBgm("엔딩");
+            SceneManager.LoadScene(2);
+            Debug.Log("게임 클리어");
         }
     }
 
@@ -184,7 +359,7 @@ public class GameManager : MonoBehaviour
                 SoonPungMoney += Mathf.Round(UpgradeValue[num] * 10f) / 10f;
                 break;
             case 2:
-                MoneyValue += Mathf.Round(UpgradeValue[num] * 10f) / 10f;
+                MoneyValue += UpgradeValue[num];
                 break;
             case 3:
                 DoubleRand += (int)UpgradeValue[num];
@@ -235,7 +410,8 @@ public class GameManager : MonoBehaviour
         }
 
         GTicket--;
-
+        GaSkyCount++;
+        NoText.text = "";
         SfxManager.instance.PlayBgm("갸차1");
 
         StartCoroutine(gotcahYeon());
@@ -290,27 +466,73 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+
     IEnumerator RotateGO()
     {
         yield return new WaitForSeconds(1f);
         ObjectRotator objectRotator = Tea.GetComponent<ObjectRotator>();
         objectRotator.isRotating = false;
         Tea.SetActive(false);
-        for(int i = 0; i < DottyGotcahParent.transform.childCount; i++)
+        bool SSS = false;
+        if(GaSkyCount >= 10 + SoonPungRealLv || Gpoint == 0)
         {
-            if(i == Gpoint)
+            GaSkyCount = 0;
+            SSS = true;
+        }
+
+        int rand = Random.Range(1, 100);
+        if(rand <= 25)
+        {
+            GaSkyCount = 0;
+            SSS = true;
+        }
+
+        if (Gpoint >= 8)
+            SSS = false;
+
+        if(SSS)
+        {
+            for (int i = 0; i < DottyGotcahParent.transform.childCount; i++)
             {
-                DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(true);
-                DottyName.text = DottyGotcahParent.transform.GetChild(i).gameObject.name;
-                DottyUnLock[i] = true;
-                Image img = GotcahBannerParent.transform.GetChild(i).GetComponent<Image>();
-                img.color = Color.white;
-            } else
+                if (i == Gpoint)
+                {
+                    DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(true);
+                    DottyName.text = DottyGotcahParent.transform.GetChild(i).gameObject.name;
+                    DottyUnLock[i] = true;
+                    Image img = GotcahBannerParent.transform.GetChild(i).GetComponent<Image>();
+                    img.color = Color.white;
+                    DottyUnLock[Gpoint + 1] = true;
+                }
+                else
+                {
+                    DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(false);
+                }
+            }
+            if (Gpoint <= 7)
+                Gpoint++;
+        } else
+        {
+            int Fuck = Random.Range(0, Gpoint-1);
+            for (int i = 0; i < DottyGotcahParent.transform.childCount; i++)
             {
-                DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(false);
+                if (i == Fuck)
+                {
+                    DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(true);
+                    DottyName.text = DottyGotcahParent.transform.GetChild(i).gameObject.name;
+                
+
+                    int counts = 10 + (Fuck * 10);
+                    NoText.text = $"중복! {counts}회 출산으로 대체합니다!";
+                    SoonPung.instance.DottySoonPungGa(counts);
+                }
+                else
+                {
+                    DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(false);
+                }
             }
         }
-        Gpoint++;
+
         Backbtn.SetActive(true);
 
     }
@@ -378,12 +600,13 @@ public class GameManager : MonoBehaviour
             str += $"도티 {participants.Count}명은 {eventStr[eventName].EventStr} {totalMoney}원\n";
         }
 
-        str += $"합계: {EndMoney}원";
+        str += $"합계: {UIManager.Instance.FormatKoreanCurrency((long)EndMoney)}원";
         SfxManager.instance.PlaySfx("구매");
         UIManager.Instance.DottyResult(str);
         Debug.Log(str);
 
         currentDotty.Clear();
+        CurrentHosDottyCount = 0;
 
         foreach(Transform tr in SoonPung.instance.gameObject.transform)
         {

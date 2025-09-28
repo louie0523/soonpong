@@ -11,10 +11,11 @@ public class DottyEvents
 
 public class Dotty : MonoBehaviour
 {
-    
     public GameObject DottyObj;
     [SerializeField]
     public List<DottyEvents> Events = new List<DottyEvents>();
+
+    
 
     public DottyEvent GetEvent()
     {
