@@ -4,6 +4,7 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 
 
@@ -18,6 +19,11 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI DottyCountText;
     public TextMeshProUGUI MoneyText;
     public GameObject DottyResultObj;
+    public TextMeshProUGUI DottyResultTxt;
+    public TextMeshProUGUI SoonPungLvTxt;
+    public Slider SoonPungLvSlider;
+    public GameObject LevelObj;
+    public TextMeshProUGUI GaCahTicket;
     [Header("출산 지원")]
     public GameObject SoonPungParent;
 
@@ -39,6 +45,12 @@ public class UIManager : MonoBehaviour
         SetMoneyText();
 
         SoonPungUpgrade();
+
+        SoonPungLvTxt.text = $"출산 레벨 : {GameManager.instance.SoonPungRealLv + 1} ( 남은 도티 수 : {GameManager.instance.NeedLvDotty[GameManager.instance.SoonPungRealLv] - GameManager.instance.currentGetDotty} )";
+
+        SoonPungLvSlider.value = GameManager.instance.currentGetDotty / (float)GameManager.instance.NeedLvDotty[GameManager.instance.SoonPungRealLv];
+
+        GaCahTicket.text = "뽑기 티켓 : " + GameManager.instance.GTicket.ToString();
     }
 
     public void SoonPungUpgrade()
@@ -81,6 +93,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void LevelUP()
+    {
+        LevelObj.SetActive(true);
+        TextMeshProUGUI LevelText = LevelObj.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI LevelEx = LevelObj.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+
+        LevelText.text = $"{GameManager.instance.SoonPungRealLv - 1} -> {GameManager.instance.SoonPungRealLv}";
+        LevelEx.text = $"뽑기 티켓 + 1\n {GameManager.instance.LevelBuff[GameManager.instance.SoonPungRealLv]}";
+
+    }
 
 
     void SetMoneyText()
@@ -120,9 +142,8 @@ public class UIManager : MonoBehaviour
     {
         DottyResultObj.SetActive(true);
 
-        TextMeshProUGUI text = DottyResultObj.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
 
-        text.text = str;
+        DottyResultTxt.text = str;
 
 
     }

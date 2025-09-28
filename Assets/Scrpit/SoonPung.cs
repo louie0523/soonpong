@@ -28,19 +28,36 @@ public class SoonPung : MonoBehaviour
     private void Start()
     {
         animator = PlayerObj.GetComponent<Animator>();
+
+       
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKeyDown(KeyCode.Mouse0) && GameManager.instance.gotChaDangay == 0)
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                 return;
 
             DottySoonPung();
-        } else if(Input.GetKeyDown(KeyCode.Space))
+        } else if(Input.GetKeyDown(KeyCode.Space) && GameManager.instance.gotChaDangay == 0 )
         {
             DottySoonPung();
+        }
+
+        int count = GameManager.instance.currentDotty.Count;
+        if (count >= 100)
+        {
+            // 100개일 때 0.99, 300개일 때 0.5가 되도록 보간
+            float t = Mathf.InverseLerp(100, 300, count);
+            float scale = Mathf.Lerp(0.99f, 0.5f, t);
+
+            transform.localScale = new Vector3(scale, scale, scale);
+        }
+        else
+        {
+            // 100개 미만일 때는 기본 크기
+            transform.localScale = Vector3.one;
         }
     }
 
@@ -48,64 +65,45 @@ public class SoonPung : MonoBehaviour
     {
 
         int DottyNum = 0;
-        if(GameManager.instance.SDottyCount >= GameManager.instance.MaxSDottyCount && GameManager.instance.SpecialDotty)
+        if(GameManager.instance.Gpoint >= 1)
         {
-            int Dcount = 0;
-            while(DottyNum == 0)
-            {
-                
-                int r = Random.Range(1, Dotty.Count);
-                if(r != 0 && GameManager.instance.DottyUnLock[r])
-                {
-                    DottyNum = r;
-                    GameManager.instance.SDottyCount = 0;
-                    break;
-                }
-                Dcount++;
 
-                if(Dcount >= 100)
-                {
-                    break;
-                }
-            }
+
+                
+            int r = Random.Range(0, GameManager.instance.Gpoint + 1);
+    
+                DottyNum = r;
+
+    
+
+ 
+            
         }
 
         animator.SetTrigger("soon");
         Dotty dt = Instantiate(Dotty[DottyNum], SonnPungPoint.position, Quaternion.identity, transform).GetComponent<Dotty>();
         int rand = Random.Range(1, 3);
+        if(GameManager.instance.gotChaDangay == 0)
         SfxManager.instance.PlaySfx("호잇짜" + rand);
 
         GameManager.instance.AddMoeny(GameManager.instance.SoonPungMoney);
 
         GameManager.instance.currentDotty.Add(dt);
+        GameManager.instance.currentGetDotty++;
 
-        if(DottyNum == 0)
-            GameManager.instance.SDottyCount++;
+
+
+        GameManager.instance.LvCheck();
 
         if (GameManager.instance.DoubleRand <= 0)
             return;
 
         int DottyNum2 = 0;
-        if (GameManager.instance.SDottyCount >= GameManager.instance.MaxSDottyCount && GameManager.instance.SpecialDotty)
+        if (GameManager.instance.Gpoint >= 1)
         {
-            int Dcount = 0;
-            while (DottyNum2 == 0)
-            {
+            int r = Random.Range(0, GameManager.instance.Gpoint + 1);
 
-                int r = Random.Range(1, Dotty.Count);
-                if (r != 0 && GameManager.instance.DottyUnLock[r])
-                {
-                    DottyNum2 = r;
-                    GameManager.instance.SDottyCount = 0;
-                    break;
-                }
-                Dcount++;
-
-                if (Dcount >= 100)
-                {
-                    break;
-                }
-            }
+            DottyNum2 =  r;
         }
 
         int dr = Random.Range(1, 101);
@@ -113,14 +111,18 @@ public class SoonPung : MonoBehaviour
         {
             animator.SetTrigger("soon");
             Dotty dt2 = Instantiate(Dotty[DottyNum2], SonnPungPoint.position, Quaternion.identity, transform).GetComponent<Dotty>();
-            SfxManager.instance.PlaySfx("짜잇호1");
+            if (GameManager.instance.gotChaDangay == 0)
+                SfxManager.instance.PlaySfx("짜잇호1");
             GameManager.instance.currentDotty.Add(dt2);
+            GameManager.instance.currentGetDotty++;
 
 
             GameManager.instance.AddMoeny(GameManager.instance.SoonPungMoney);
 
-            if (DottyNum == 0)
-                GameManager.instance.SDottyCount++;
         }
+
+
+        GameManager.instance.LvCheck();
+
     }
 }

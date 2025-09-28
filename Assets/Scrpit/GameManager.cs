@@ -2,6 +2,12 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using static UnityEngine.Rendering.DebugUI;
+using System.Net.NetworkInformation;
+using UnityEditor.PackageManager;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+using TMPro;
+using UnityEngine.UI;
 
 
 public enum AddType
@@ -28,16 +34,38 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
 
+
+
+    [Header("시작 bgm")]
+    public string bgmName;
+    [Header("인게임 정보")]
     public List<Dotty> currentDotty = new List<Dotty>();
     public Dictionary<string, DottyEvent> eventStr = new Dictionary<string, DottyEvent>(); 
     public float Money;
     public float AutoTimer;
     public float AutoTime = 10f;
     public bool Checking = false;
-    public int SDottyCount = 0;
-    public int MaxSDottyCount = 25;
     public List<bool> DottyUnLock = new List<bool> { true, false, false, false, false, false, false, false, false };
     public bool SpecialDotty = false;
+    public int currentGetDotty = 0;
+    public List<int> NeedLvDotty = new List<int>();
+    public int SoonPungRealLv = 0;
+    public int currentMap = 0;
+    public List<string> LevelBuff = new List<string>();
+    public List<int> LvUpGtick = new List<int>();
+    [Header("갸차")]
+    public int GTicket;
+    public int Gpoint = 0;
+    public GameObject GCamara;
+    public GameObject GotChaCanvas;
+    public int gotChaDangay = 0;
+    public float heartSfxTimer;
+    public Volume volume;
+    public GameObject Tea;
+    public GameObject DottyGotcahParent;
+    public TextMeshProUGUI DottyName;
+    public GameObject Backbtn;
+    public GameObject GotcahBannerParent;
 
     [Header("업그레이드")]
     public int AutoSoonPungUp = 0;
@@ -65,9 +93,30 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        SfxManager.instance.PlayBgm(bgmName);
+    }
+
     private void Update()
     {
         AutoSoonPung();
+
+        if(gotChaDangay == 2 && Input.GetKeyDown(KeyCode.Space))
+        {
+            SfxManager.instance.PlaySfx("글리치");
+            GatcahCanAct();
+        }
+
+        if(gotChaDangay == 3 )
+        {
+            heartSfxTimer += Time.deltaTime;
+            if(heartSfxTimer >= 1)
+            {
+                SfxManager.instance.PlaySfx("갸차2");
+                heartSfxTimer = 0;
+            }
+        }
     }
 
     void AutoSoonPung()
@@ -87,6 +136,24 @@ public class GameManager : MonoBehaviour
         foreach(DottyEvent e in events)
         {
             eventStr.Add(e.name, e);
+        }
+    }
+
+    public void LvCheck()
+    {
+        Debug.Log("레벨 체킹");
+        if(SoonPungRealLv < 8)
+        {
+            if(currentGetDotty >= NeedLvDotty[SoonPungRealLv])
+            {
+                SoonPungRealLv++;
+                SfxManager.instance.PlaySfx("레벨업");
+                UIManager.Instance.Message("레벨이 증가하였습니다!");
+                Debug.Log("레벨 업!");
+                UIManager.Instance.LevelUP();
+                currentGetDotty = 0;
+                GTicket += LvUpGtick[SoonPungRealLv - 1];
+            }
         }
     }
 
@@ -158,6 +225,116 @@ public class GameManager : MonoBehaviour
 
     }
 
+    public void GatchaGo()
+    {
+        if(GTicket <= 0)
+        {
+            UIManager.Instance.Message("뽑기 티겟이 부족합니다.");
+            SfxManager.instance.PlaySfx("취소");
+            return;
+        }
+
+        GTicket--;
+
+        SfxManager.instance.PlayBgm("갸차1");
+
+        StartCoroutine(gotcahYeon());
+    }
+
+    public void GatcahCanAct()
+    {
+        gotChaDangay = 3;
+        GotChaCanvas.SetActive(true);
+        RectTransform rect = Tea.GetComponent<RectTransform>();
+        rect.localScale = new Vector3(1, 1, 1);
+    }
+    
+    public IEnumerator gotcahYeon()
+    {
+        ObjectRotator objectRotator = Tea.GetComponent<ObjectRotator>();
+        objectRotator.isRotating = false;
+        ChromaticAberration ch;
+        volume.profile.TryGet<ChromaticAberration>(out ch);
+        ch.active = true;
+        LiftGammaGain LGG;
+        volume.profile.TryGet<LiftGammaGain>(out LGG);
+        LGG.active = true;
+        DottyName.text = "";
+        Tea.SetActive(true);
+        Backbtn.SetActive(false);
+        HeartbeatEffect heartbeatEffect = Tea.GetComponent<HeartbeatEffect>();
+        heartbeatEffect.EnableHeartbeat();
+        gotChaDangay = 1;
+        GCamara.SetActive(true);
+        Animator ani = GCamara.GetComponent<Animator>();
+        ani.SetTrigger("Move");
+        yield return new WaitForSeconds(2.5f);
+        RectTransform rect = Tea.GetComponent<RectTransform>();
+        rect.localScale = new Vector3(1, 1, 1);
+        rect.localRotation = Quaternion.identity;
+        gotChaDangay = 2;
+    }
+
+
+    public void GetDotty()
+    {
+        if(gotChaDangay == 3)
+        {
+            gotChaDangay = 4;
+            HeartbeatEffect heartbeatEffect = Tea.GetComponent<HeartbeatEffect>();
+            heartbeatEffect.DisableHeartbeat();
+            SfxManager.instance.PlaySfx("갸차3");
+            ObjectRotator objectRotator = Tea.GetComponent<ObjectRotator>();
+            objectRotator.isRotating = true;
+            StartCoroutine(RotateGO());
+        }
+    }
+
+    IEnumerator RotateGO()
+    {
+        yield return new WaitForSeconds(1f);
+        ObjectRotator objectRotator = Tea.GetComponent<ObjectRotator>();
+        objectRotator.isRotating = false;
+        Tea.SetActive(false);
+        for(int i = 0; i < DottyGotcahParent.transform.childCount; i++)
+        {
+            if(i == Gpoint)
+            {
+                DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(true);
+                DottyName.text = DottyGotcahParent.transform.GetChild(i).gameObject.name;
+                DottyUnLock[i] = true;
+                Image img = GotcahBannerParent.transform.GetChild(i).GetComponent<Image>();
+                img.color = Color.white;
+            } else
+            {
+                DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(false);
+            }
+        }
+        Gpoint++;
+        Backbtn.SetActive(true);
+
+    }
+
+    public void BackToTheGame()
+    {
+        GCamara.SetActive(false);
+        GotChaCanvas.SetActive(false);
+        gotChaDangay = 0;
+        ChromaticAberration ch;
+        volume.profile.TryGet<ChromaticAberration>(out ch);
+        ch.active = false;
+        LiftGammaGain LGG;
+        volume.profile.TryGet<LiftGammaGain>(out LGG);
+        LGG.active = false;
+        for (int i = 0; i < DottyGotcahParent.transform.childCount; i++)
+        {
+            DottyGotcahParent.transform.GetChild(i).gameObject.SetActive(false);
+            
+        }
+        SfxManager.instance.PlayBgm(bgmName);
+    }
+
+
 
     public void GetOutDottys()
     {
@@ -168,6 +345,7 @@ public class GameManager : MonoBehaviour
         Checking = true;
         Dictionary<string, List<string>> namesByEvent = new Dictionary<string, List<string>>();
         Dictionary<string, float> moneyByEvent = new Dictionary<string, float>();
+     
 
 
         float EndMoney = 0;
